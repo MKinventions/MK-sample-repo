@@ -1,0 +1,512 @@
+
+int led1 = A2;
+int led2 = A3;
+int led3 = A4;
+int led4 = A5;
+int led5 = 3;
+int led6 = 4;
+int led7 = 5;
+int led8 = 6;
+int led9 = 7;
+int led10 = 8;
+int led11 = 9;
+int led12 = 10;
+int led13 = 11;
+int led14 = 12;
+int led15 = A0;
+int led16 = A1;
+
+
+int btn = 2;
+int ir = 13;
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(led1, OUTPUT);
+  pinMode(led2, OUTPUT);
+  pinMode(led3, OUTPUT);
+  pinMode(led4, OUTPUT);
+  pinMode(led5, OUTPUT);
+  pinMode(led6, OUTPUT);
+  pinMode(led7, OUTPUT);
+  pinMode(led8, OUTPUT);
+  pinMode(led9, OUTPUT);
+  pinMode(led10, OUTPUT);
+  pinMode(led11, OUTPUT);
+  pinMode(led12, OUTPUT);
+  pinMode(led13, OUTPUT);
+  pinMode(led14, OUTPUT);
+  pinMode(led15, OUTPUT);
+  pinMode(led16, OUTPUT);
+
+
+  pinMode(btn, INPUT_PULLUP);
+  pinMode(ir, INPUT);
+}
+
+void loop() {
+
+int sensor = digitalRead(ir);
+int button = digitalRead(btn);
+
+
+Serial.println(button);
+
+if(button == 0){//automatic blinking start
+    leds_blink(); 
+   }
+else if(button == 1){//automatic blinking stop
+  
+  if(sensor == 0){//only if ir sensor detect
+     leds_blink();
+    }
+   all_led_off();//all led will 
+ }
+}
+
+
+
+
+void all_led_off(){
+    digitalWrite(led1, LOW);
+  digitalWrite(led2, LOW);
+  digitalWrite(led3, LOW);
+  digitalWrite(led4, LOW);
+  digitalWrite(led5, LOW);
+  digitalWrite(led6, LOW);
+  digitalWrite(led7, LOW);
+  digitalWrite(led8, LOW);
+  digitalWrite(led9, LOW);
+  digitalWrite(led10, LOW);
+  digitalWrite(led11, LOW);
+  digitalWrite(led12, LOW);
+  digitalWrite(led13, LOW);
+  digitalWrite(led14, LOW);
+  digitalWrite(led15, LOW);
+  digitalWrite(led16, LOW);
+}
+
+void leds_blink(){
+  all_red_leds_blink(20);
+all_red_leds_blink(50);
+all_red_leds_blink(100);
+all_red_leds_blink(200);
+
+all_blue_leds_blink(20);
+all_blue_leds_blink(50);
+all_blue_leds_blink(100);
+all_blue_leds_blink(200);
+
+all_leds_blink_sholin_cw(50);
+all_leds_blink_sholin_ccw(500);
+all_leds_blink_sholin_cw(100);
+all_leds_blink_sholin_ccw(100);
+all_leds_blink_sholin_cw(200);
+all_leds_blink_sholin_ccw(200);
+  
+all_leds_blink(10);
+all_leds_blink(20);
+all_leds_blink(30);
+all_leds_blink(40);
+all_leds_blink(50);
+all_leds_blink(60);
+all_leds_blink(70);
+all_leds_blink(80);
+all_leds_blink(90);
+all_leds_blink(100);
+
+ all_leds_blink_series_cw(10);
+all_leds_blink_series_cw(20);
+all_leds_blink_series_cw(30);
+all_leds_blink_series_cw(40);
+all_leds_blink_series_cw(50);
+all_leds_blink_series_cw(60);
+all_leds_blink_series_cw(70);
+all_leds_blink_series_cw(80);
+all_leds_blink_series_cw(90);
+all_leds_blink_series_cw(100);
+
+all_leds_blink_series_ccw(10);
+all_leds_blink_series_ccw(20);
+all_leds_blink_series_ccw(30);
+all_leds_blink_series_ccw(40);
+all_leds_blink_series_ccw(50);
+all_leds_blink_series_ccw(60);
+all_leds_blink_series_ccw(70);
+all_leds_blink_series_ccw(80);
+all_leds_blink_series_ccw(90);
+all_leds_blink_series_ccw(100);
+}
+
+void all_leds_blink_sholin_cw(int Timedelay){  
+  digitalWrite(led1, HIGH);
+  digitalWrite(led9, HIGH);
+  delay(Timedelay); 
+  
+  digitalWrite(led2, HIGH);
+  digitalWrite(led10, HIGH);
+  delay(Timedelay); 
+  
+  digitalWrite(led3, HIGH);
+  digitalWrite(led11, HIGH); 
+  delay(Timedelay); 
+  
+  digitalWrite(led4, HIGH);
+  digitalWrite(led12, HIGH);
+  delay(Timedelay); 
+    
+  digitalWrite(led5, HIGH);
+  digitalWrite(led13, HIGH); 
+  delay(Timedelay); 
+    
+  digitalWrite(led6, HIGH);
+  digitalWrite(led14, HIGH);  
+  delay(Timedelay); 
+    
+  digitalWrite(led7, HIGH);
+  digitalWrite(led15, HIGH); 
+  delay(Timedelay); 
+    
+  digitalWrite(led8, HIGH);
+  digitalWrite(led16, HIGH);
+  delay(Timedelay);                      
+  
+  digitalWrite(led1, LOW);
+  digitalWrite(led9, LOW);
+  delay(Timedelay); 
+    
+  digitalWrite(led2, LOW);
+  digitalWrite(led10, LOW);
+  delay(Timedelay); 
+    
+  digitalWrite(led3, LOW);
+  digitalWrite(led11, LOW); 
+  delay(Timedelay); 
+    
+  digitalWrite(led4, LOW);
+  digitalWrite(led12, LOW);
+  delay(Timedelay); 
+    
+  digitalWrite(led5, LOW);
+  digitalWrite(led13, LOW); 
+  delay(Timedelay); 
+  
+  digitalWrite(led6, LOW);
+  digitalWrite(led14, LOW);  
+  delay(Timedelay); 
+   
+  digitalWrite(led7, LOW);
+  digitalWrite(led15, LOW); 
+  delay(Timedelay); 
+   
+  digitalWrite(led8, LOW);
+  digitalWrite(led16, LOW);
+  delay(Timedelay);                      
+              
+}
+
+void all_leds_blink_sholin_ccw(int Timedelay){  
+  digitalWrite(led8, HIGH);
+  digitalWrite(led16, HIGH);
+  delay(Timedelay); 
+  digitalWrite(led7, HIGH);
+  digitalWrite(led15, HIGH); 
+  delay(Timedelay); 
+  digitalWrite(led6, HIGH);
+  digitalWrite(led14, HIGH); 
+  delay(Timedelay); 
+  digitalWrite(led5, HIGH);
+  digitalWrite(led13, HIGH); 
+  delay(Timedelay); 
+  digitalWrite(led4, HIGH);
+  digitalWrite(led12, HIGH);
+  delay(Timedelay);  
+  digitalWrite(led3, HIGH);
+  digitalWrite(led11, HIGH);   
+  delay(Timedelay); 
+  digitalWrite(led2, HIGH);
+  digitalWrite(led10, HIGH);
+  delay(Timedelay); 
+  digitalWrite(led1, HIGH);
+  digitalWrite(led9, HIGH);
+  delay(Timedelay);                      
+  
+   digitalWrite(led8, LOW);
+  digitalWrite(led16, LOW);
+  delay(Timedelay); 
+  digitalWrite(led7, LOW);
+  digitalWrite(led15, LOW); 
+  delay(Timedelay); 
+  digitalWrite(led6, LOW);
+  digitalWrite(led14, LOW); 
+  delay(Timedelay); 
+  digitalWrite(led5, LOW);
+  digitalWrite(led13, LOW); 
+  delay(Timedelay); 
+  digitalWrite(led4, LOW);
+  digitalWrite(led12, LOW);
+  delay(Timedelay);  
+  digitalWrite(led3, LOW);
+  digitalWrite(led11, LOW);   
+  delay(Timedelay); 
+  digitalWrite(led2, LOW);
+  digitalWrite(led10, LOW);
+  delay(Timedelay); 
+  digitalWrite(led1, LOW);
+  digitalWrite(led9, LOW);
+  delay(Timedelay);             
+}
+
+void all_blue_leds_blink(int Timedelay){  
+//  digitalWrite(led1, HIGH);
+  digitalWrite(led2, HIGH);
+//  digitalWrite(led3, HIGH);
+  digitalWrite(led4, HIGH);
+//  digitalWrite(led5, HIGH);
+  digitalWrite(led6, HIGH);
+//  digitalWrite(led7, HIGH);
+  digitalWrite(led8, HIGH);
+//  digitalWrite(led9, HIGH);
+  digitalWrite(led10, HIGH);
+//  digitalWrite(led11, HIGH);
+  digitalWrite(led12, HIGH);
+//  digitalWrite(led13, HIGH);
+  digitalWrite(led14, HIGH);
+//  digitalWrite(led15, HIGH);
+  digitalWrite(led16, HIGH);
+  delay(Timedelay);                      
+  
+//  digitalWrite(led1, LOW);
+  digitalWrite(led2, LOW);
+//  digitalWrite(led3, LOW);
+  digitalWrite(led4, LOW);
+//  digitalWrite(led5, LOW);
+  digitalWrite(led6, LOW);
+//  digitalWrite(led7, LOW);
+  digitalWrite(led8, LOW);
+//  digitalWrite(led9, LOW);
+  digitalWrite(led10, LOW);
+//  digitalWrite(led11, LOW);
+  digitalWrite(led12, LOW);
+//  digitalWrite(led13, LOW);
+  digitalWrite(led14, LOW);
+//  digitalWrite(led15, LOW);
+  digitalWrite(led16, LOW);
+  delay(Timedelay);                      
+}
+
+void all_red_leds_blink(int Timedelay){  
+  digitalWrite(led1, HIGH);
+//  digitalWrite(led2, HIGH);
+  digitalWrite(led3, HIGH);
+//  digitalWrite(led4, HIGH);
+  digitalWrite(led5, HIGH);
+//  digitalWrite(led6, HIGH);
+  digitalWrite(led7, HIGH);
+//  digitalWrite(led8, HIGH);
+  digitalWrite(led9, HIGH);
+//  digitalWrite(led10, HIGH);
+  digitalWrite(led11, HIGH);
+//  digitalWrite(led12, HIGH);
+  digitalWrite(led13, HIGH);
+//  digitalWrite(led14, HIGH);
+  digitalWrite(led15, HIGH);
+//  digitalWrite(led16, HIGH);
+  delay(Timedelay);                      
+  
+  digitalWrite(led1, LOW);
+//  digitalWrite(led2, LOW);
+  digitalWrite(led3, LOW);
+//  digitalWrite(led4, LOW);
+  digitalWrite(led5, LOW);
+//  digitalWrite(led6, LOW);
+  digitalWrite(led7, LOW);
+//  digitalWrite(led8, LOW);
+  digitalWrite(led9, LOW);
+//  digitalWrite(led10, LOW);
+  digitalWrite(led11, LOW);
+//  digitalWrite(led12, LOW);
+  digitalWrite(led13, LOW);
+//  digitalWrite(led14, LOW);
+  digitalWrite(led15, LOW);
+//  digitalWrite(led16, LOW);
+  delay(Timedelay);                      
+}
+
+
+
+void all_leds_blink_series_ccw(int Timedelay){  
+  digitalWrite(led16, HIGH);
+  delay(Timedelay);
+  digitalWrite(led15, HIGH);
+  delay(Timedelay);
+  digitalWrite(led14, HIGH);
+  delay(Timedelay);
+  digitalWrite(led13, HIGH);
+  delay(Timedelay);
+  digitalWrite(led12, HIGH);
+  delay(Timedelay);
+  digitalWrite(led11, HIGH);
+  delay(Timedelay);
+  digitalWrite(led10, HIGH);
+  delay(Timedelay);
+  digitalWrite(led9, HIGH);
+  delay(Timedelay);
+  digitalWrite(led8, HIGH);
+  delay(Timedelay);
+  digitalWrite(led7, HIGH);
+  delay(Timedelay);
+  digitalWrite(led6, HIGH);
+  delay(Timedelay);
+  digitalWrite(led5, HIGH);
+  delay(Timedelay);
+  digitalWrite(led4, HIGH);
+  delay(Timedelay);
+  digitalWrite(led3, HIGH);
+  delay(Timedelay);
+  digitalWrite(led2, HIGH);
+  delay(Timedelay);
+  digitalWrite(led1, HIGH);
+  delay(Timedelay);                      
+  
+  digitalWrite(led16, LOW);
+  delay(Timedelay);
+  digitalWrite(led15, LOW);
+  delay(Timedelay);
+  digitalWrite(led14, LOW);
+  delay(Timedelay);
+  digitalWrite(led13, LOW);
+  delay(Timedelay);
+  digitalWrite(led12, LOW);
+  delay(Timedelay);
+  digitalWrite(led11, LOW);
+  delay(Timedelay);
+  digitalWrite(led10, LOW);
+  delay(Timedelay);
+  digitalWrite(led9, LOW);
+  delay(Timedelay);
+  digitalWrite(led8, LOW);
+  delay(Timedelay);
+  digitalWrite(led7, LOW);
+  delay(Timedelay);
+  digitalWrite(led6, LOW);
+  delay(Timedelay);
+  digitalWrite(led5, LOW);
+  delay(Timedelay);
+  digitalWrite(led4, LOW);
+  delay(Timedelay);
+  digitalWrite(led3, LOW);
+  delay(Timedelay);
+  digitalWrite(led2, LOW);
+  delay(Timedelay);
+  digitalWrite(led1, LOW);
+  delay(Timedelay);                  
+}
+
+
+void all_leds_blink_series_cw(int Timedelay){  
+  digitalWrite(led1, HIGH);
+  delay(Timedelay);
+  digitalWrite(led2, HIGH);
+  delay(Timedelay);
+  digitalWrite(led3, HIGH);
+  delay(Timedelay);
+  digitalWrite(led4, HIGH);
+  delay(Timedelay);
+  digitalWrite(led5, HIGH);
+  delay(Timedelay);
+  digitalWrite(led6, HIGH);
+  delay(Timedelay);
+  digitalWrite(led7, HIGH);
+  delay(Timedelay);
+  digitalWrite(led8, HIGH);
+  delay(Timedelay);
+  digitalWrite(led9, HIGH);
+  delay(Timedelay);
+  digitalWrite(led10, HIGH);
+  delay(Timedelay);
+  digitalWrite(led11, HIGH);
+  delay(Timedelay);
+  digitalWrite(led12, HIGH);
+  delay(Timedelay);
+  digitalWrite(led13, HIGH);
+  delay(Timedelay);
+  digitalWrite(led14, HIGH);
+  delay(Timedelay);
+  digitalWrite(led15, HIGH);
+  delay(Timedelay);
+  digitalWrite(led16, HIGH);
+  delay(Timedelay);                      
+  
+  digitalWrite(led1, LOW);
+  delay(Timedelay);
+  digitalWrite(led2, LOW);
+  delay(Timedelay);
+  digitalWrite(led3, LOW);
+  delay(Timedelay);
+  digitalWrite(led4, LOW);
+  delay(Timedelay);
+  digitalWrite(led5, LOW);
+  delay(Timedelay);
+  digitalWrite(led6, LOW);
+  delay(Timedelay);
+  digitalWrite(led7, LOW);
+  delay(Timedelay);
+  digitalWrite(led8, LOW);
+  delay(Timedelay);
+  digitalWrite(led9, LOW);
+  delay(Timedelay);
+  digitalWrite(led10, LOW);
+  delay(Timedelay);
+  digitalWrite(led11, LOW);
+  delay(Timedelay);
+  digitalWrite(led12, LOW);
+  delay(Timedelay);
+  digitalWrite(led13, LOW);
+  delay(Timedelay);
+  digitalWrite(led14, LOW);
+  delay(Timedelay);
+  digitalWrite(led15, LOW);
+  delay(Timedelay);
+  digitalWrite(led16, LOW);
+  delay(Timedelay);                  
+}
+
+
+void all_leds_blink(int Timedelay){  
+  digitalWrite(led1, HIGH);
+  digitalWrite(led2, HIGH);
+  digitalWrite(led3, HIGH);
+  digitalWrite(led4, HIGH);
+  digitalWrite(led5, HIGH);
+  digitalWrite(led6, HIGH);
+  digitalWrite(led7, HIGH);
+  digitalWrite(led8, HIGH);
+  digitalWrite(led9, HIGH);
+  digitalWrite(led10, HIGH);
+  digitalWrite(led11, HIGH);
+  digitalWrite(led12, HIGH);
+  digitalWrite(led13, HIGH);
+  digitalWrite(led14, HIGH);
+  digitalWrite(led15, HIGH);
+  digitalWrite(led16, HIGH);
+  delay(Timedelay);                      
+  
+  digitalWrite(led1, LOW);
+  digitalWrite(led2, LOW);
+  digitalWrite(led3, LOW);
+  digitalWrite(led4, LOW);
+  digitalWrite(led5, LOW);
+  digitalWrite(led6, LOW);
+  digitalWrite(led7, LOW);
+  digitalWrite(led8, LOW);
+  digitalWrite(led9, LOW);
+  digitalWrite(led10, LOW);
+  digitalWrite(led11, LOW);
+  digitalWrite(led12, LOW);
+  digitalWrite(led13, LOW);
+  digitalWrite(led14, LOW);
+  digitalWrite(led15, LOW);
+  digitalWrite(led16, LOW);
+  delay(Timedelay);                      
+}
