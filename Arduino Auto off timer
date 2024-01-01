@@ -1,0 +1,111 @@
+
+int led = 4;
+int btn = 7;
+int btn1 = 8;
+int btn2 = 9;
+int btn3 = 10;
+int btn4 = 11;
+
+
+
+int onTimer = 5;
+int offTimer = 5;
+
+int counter = 0;
+int totalTime = 0;
+
+
+int lastButton = 0;
+int buttonState = 0;
+
+void(* resetFunc) (void) = 0; //declare reset function @ address 0
+
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(led, OUTPUT);
+  pinMode(btn1, INPUT);
+  pinMode(btn2, INPUT);
+  pinMode(btn3, INPUT);
+  pinMode(btn4, INPUT);
+  pinMode(btn, INPUT);
+  
+}
+
+void loop() {
+
+//int sw = digitalRead(btn);
+
+int b1 = digitalRead(btn1);
+int b2 = digitalRead(btn2);
+int b3 = digitalRead(btn3);
+int b4 = digitalRead(btn4);
+
+
+//Serial.print("Button: " +String(sw));
+//
+//Serial.print(", s1: " +String(b1));
+//Serial.print(", s2: " +String(b2));
+//Serial.print(", s3: " +String(b3));
+//Serial.println(", s4: " +String(b4));
+
+
+
+int currentButton = digitalRead(btn);
+if(currentButton != lastButton){
+lastButton = currentButton;
+
+if(lastButton == 0){
+
+  buttonState = (buttonState == 1) ? 0 : 1;
+}
+}
+
+Serial.println("Button State: " +String(buttonState));  
+delay(200);
+
+
+
+
+totalTime = onTimer + offTimer;
+
+if(buttonState == 1){
+
+  while(counter < totalTime){
+    counter++;
+    Serial.println("Load will Turn off in [" +String(counter)+ "] seconds");  
+    delay(1000);   
+    
+      if(counter == offTimer){
+        digitalWrite(led, HIGH);
+      }
+                 
+  }
+    digitalWrite(led, LOW);
+    Serial.println("Load is Turned off"); 
+   resetFunc();  //call reset
+
+}
+
+
+
+
+
+
+//if(buttonState == 0){
+//
+//  while(counter < timer){
+//    counter++;  
+//    digitalWrite(led, HIGH);
+//    Serial.println("Load will Turn off in [" +String(counter)+ "] seconds");  
+//    delay(1000);                    
+//  }
+//    digitalWrite(led, LOW);
+//    Serial.println("Load is Turned off"); 
+//   resetFunc();  //call reset
+//
+//}
+
+
+}
+
