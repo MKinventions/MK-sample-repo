@@ -1,0 +1,238 @@
+#include<EEPROM.h>
+#include <LiquidCrystal_I2C.h>
+
+LiquidCrystal_I2C lcd(0x27,16,2);  // set the LCD address to 0x3F for a 16 chars and 2 line display
+
+
+int btn1 = 8;
+int btn2 = 9;
+int btn3 = 10;
+int btn4 = 11;
+
+int led = 4;
+int btn = 7;
+
+int menu_select = 0;
+int menu_select_value = 0;
+
+int btn_count = 0;
+int Time = 0;
+int totalTime = 0;
+
+
+int ON_Time_address = 4;
+int OFF_Time_address = 5;
+
+byte btn_value;
+
+byte ON_Time_value;
+byte OFF_Time_value;
+
+void(* resetFunc) (void) = 0; //declare reset function @ address 0
+
+
+
+int counter = 0;
+
+int lastButton = 0;
+int buttonState = 0;
+
+
+
+void setup() {
+  lcd.init();
+//  lcd.begin();
+  lcd.clear();         
+  lcd.backlight();      // Make sure backlight is on
+
+
+    Serial.begin(115200);
+  pinMode(btn1, INPUT);
+  pinMode(btn2, INPUT);
+  pinMode(btn3, INPUT);
+  pinMode(btn4, INPUT);
+  
+  pinMode(led, OUTPUT);
+  pinMode(btn, INPUT);
+
+  ON_Time_value = EEPROM.read(ON_Time_address);//EEPROM.read(ADDRESS 0-255);
+  OFF_Time_value = EEPROM.read(OFF_Time_address);//EEPROM.read(ADDRESS 0-255);
+
+
+  Serial.println("Device restarted");
+  Serial.println("Reading memory");
+  Serial.print("ON  Time :"); Serial.println(ON_Time_value);
+  Serial.print("OFF Time :"); Serial.println(OFF_Time_value);
+
+  lcd.setCursor(0,0);   //Set cursor to character 2 on line 0
+  lcd.print("Device Restarted");
+  lcd.setCursor(0,1);   //Set cursor to character 2 on line 0
+  lcd.print("Reading Memory");
+  delay(2000);
+  lcd.clear();
+}
+
+void loop() {
+  
+
+/**************Select menu start***************************/
+  int menu_select_button = digitalRead(btn1);
+  if (menu_select_button == LOW) {
+    menu_select++;
+    Serial.println(menu_select);
+  }
+  if (menu_select == 3) {
+    menu_select = 1;
+  }
+  /************select menu end****************************/
+
+  /*************select menu value start*******************/
+  int button1 = digitalRead(btn2);
+  if (button1 == LOW) {
+    menu_select_value++;
+    //    Serial.println(mode_select_value);
+  }
+  if (menu_select_value == 4) {
+    menu_select_value = 1;
+  }
+  /*************select menu value start end***************/
+
+
+/**************Time increase and decrease start***************************/
+  int time_increase_button = digitalRead(btn3);
+  if (time_increase_button == LOW) {
+    Time++;
+    Serial.println(Time);
+  }
+  int time_decrease_button = digitalRead(btn4);
+  if (time_decrease_button == LOW) {
+    Time--;
+    Serial.println(Time);
+  }
+
+  if (Time == 0) {
+    Time = 0;
+  }  
+  
+  /************Timer end****************************/
+//  delay(150);
+
+
+
+
+
+
+
+int currentButton = digitalRead(btn);
+if(currentButton != lastButton){
+lastButton = currentButton;
+
+if(lastButton == 0){
+
+  buttonState = (buttonState == 1) ? 0 : 1;
+}
+}
+
+Serial.println("Button State: " +String(buttonState));  
+delay(200);
+
+
+
+totalTime = ON_Time_value + OFF_Time_value;
+Serial.println("Total Time [" +String(totalTime)+ "]");  
+
+
+if(buttonState == 1){
+
+  while(counter < totalTime){
+    counter++;
+    Serial.println("Load will Turn off in [" +String(counter)+ "] seconds");  
+    lcd.setCursor(0,0);//(col, row)
+    lcd.print(" Time:");lcd.print("   "+String(counter)+"             ");
+    lcd.setCursor(0,1);//(col, row)
+    lcd.print("                                  ");
+
+    delay(1000);   
+    
+      if(counter == OFF_Time_value){
+        digitalWrite(led, HIGH);
+      }                
+  }
+
+    digitalWrite(led, LOW);
+    Serial.println("Load is Turned off"); 
+   resetFunc();  //call reset
+}
+
+
+
+
+
+
+
+
+
+
+
+switch (menu_select) {
+    case 0:
+//      menu_select = 1;
+      
+      lcd.setCursor(0,0);//(col, row)
+      lcd.print(" ON  Time:"); lcd.print(" "+String(ON_Time_value)+"        ");lcd.print("   "+String(totalTime));
+      lcd.setCursor(0,1);//(col, row)
+      lcd.print(" OFF Time:"); lcd.println(" "+String(OFF_Time_value)+"        ");     
+//      lcd.clear();
+
+      break;
+
+    case 1:   
+      Serial.println("****ON Time**********:");
+      lcd.setCursor(0,0);//(col, row)
+      lcd.print(">ON  Time:"); lcd.print(" "+String(ON_Time_value)+"              ");
+      lcd.setCursor(0,1);//(col, row)
+      lcd.print(" OFF Time:");
+
+              switch (menu_select_value) {
+                case 0:
+                  Serial.println("please select value");
+                  break;
+                case 1:
+                  EEPROM.update(ON_Time_address, Time);
+                  lcd.setCursor(0,0);//(col, row)
+                  lcd.print(">ON  Time:"); lcd.print(">"+String(Time));
+                  lcd.setCursor(0,1);//(col, row)
+                  lcd.print(" OFF Time:"); lcd.print("                           "); 
+                  break;
+                  case 2:
+                  menu_select_value = 0;
+                  break;
+              }
+      break;
+    case 2:    // your hand is on the sensor
+      Serial.print("****OFF Time**********:");
+      lcd.setCursor(0,0);//(col, row)
+      lcd.print(" ON  Time:");
+      lcd.setCursor(0,1);//(col, row)
+      lcd.print(">OFF Time:");lcd.print(" "+String(OFF_Time_value)+"              ");
+
+              switch (menu_select_value) {
+                case 0:
+                  Serial.println("please select value");
+                  break;
+                case 1:
+                  Serial.println("1");
+                  EEPROM.update(OFF_Time_address, Time);
+                  lcd.setCursor(0,0);//(col, row)
+                  lcd.print(" ON  Time:");lcd.print("                           ");
+                  lcd.setCursor(0,1);//(col, row)
+                  lcd.print(">OFF Time:");lcd.print(">"+String(Time));
+                  break;
+                case 2:
+                  menu_select_value = 0;
+                  break;
+              }
+      break;
+
+  }
+}
