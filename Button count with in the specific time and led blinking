@@ -1,0 +1,162 @@
+#define BUTTON_PIN 5   // Connect your button to digital pin 2
+#define LED_PIN 3      // Built-in LED on digital pin 13
+#define TIMER_DURATION 5000 // Set the timer duration in milliseconds (5 seconds in this example)
+
+unsigned long startTime;
+unsigned int buttonCount = 0;
+bool timerExpired = false;
+
+
+void(* resetFunc) (void) = 0; //declare reset function @ address 0
+
+
+int buttonState = 0;
+int lastButton = 0;
+unsigned long previousMillis = 0;
+int ledState = LOW;  // ledState used to set the LED
+
+
+void setup() {
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
+  pinMode(LED_PIN, OUTPUT);
+  Serial.begin(115200);
+
+
+  Serial.println("Restarted");
+}
+
+void loop() {
+
+  int currentButton = digitalRead(BUTTON_PIN);
+  if (currentButton != lastButton) {
+    lastButton = currentButton;
+
+    if (lastButton == 1) {
+      buttonState = (buttonState == 1) ? 0 : 1;
+
+      delay(200);
+      // Serial.println("Button State: " + String(buttonState));
+
+      if (buttonState == 0) {
+        buttonCount++;
+
+        // Restart the timer
+        startTime = millis();
+        timerExpired = false;
+
+        digitalWrite(LED_PIN, HIGH);
+        Serial.println("Button Pressed! Count: " + String(buttonCount));
+      } else {
+        digitalWrite(LED_PIN, LOW);
+      }
+    }
+  }
+
+
+
+
+  // Check if the timer has expired
+  if (millis() - startTime >= TIMER_DURATION && !timerExpired) {
+    timerExpired = true;
+    Serial.println("Timer Expired! Total Button Count: " + String(buttonCount));
+    // You can add additional actions here when the timer expires
+
+
+
+    //****************************************************************//
+    if (buttonCount == 2) {
+      int i = 0;
+      while (i <= 1000) { //2seconds,  500ms = 1sec
+        Serial.println("Provision for 2 sec: " + String(i));
+        i++;
+//        digitalWrite(LED_PIN, HIGH);
+          ledBlink(LED_PIN, 100);
+          
+        if (i == 1000) {
+          digitalWrite(LED_PIN, LOW);
+          delay(1000);
+          resetFunc();  //call reset
+        }
+
+      }
+    }
+    //****************************************************************//
+
+
+    //****************************************************************//
+    if (buttonCount == 5) {
+      int i = 0;
+      while (i <= 2500) { //5seconds,  500ms = 1sec
+        Serial.println("Provision for 5 sec: " + String(i));
+        i++;
+//        digitalWrite(LED_PIN, HIGH);
+        ledBlink(LED_PIN, 500);
+        
+        if (i == 2500) {
+          digitalWrite(LED_PIN, LOW);
+          delay(1000);
+          resetFunc();  //call reset
+        }
+
+      }
+    }
+    //****************************************************************//
+
+
+    //****************************************************************//
+    if (buttonCount == 7) {
+      int i = 0;
+      while (i <= 3500) { //7seconds,  500ms = 1sec
+        Serial.println("Provision for 5 sec: " + String(i));
+        i++;
+//        digitalWrite(LED_PIN, HIGH);
+        ledBlink(LED_PIN, 1000);
+
+        if (i == 3500) {
+          digitalWrite(LED_PIN, LOW);
+          delay(1000);
+          resetFunc();  //call reset
+        }
+
+      }
+    }
+    //****************************************************************//
+
+
+    // Reset button count for the next round
+    buttonCount = 0;
+    digitalWrite(LED_PIN, HIGH); // Turn on the LED to indicate the end of the timer
+    delay(1000); // Wait for 1 second (optional)
+    digitalWrite(LED_PIN, LOW); // Turn off the LED
+
+  }
+
+  // Additional tasks can be added here as well
+
+
+}
+
+
+
+
+
+void ledBlink(int ledPin, int delayTime){
+ unsigned long currentMillis = millis();
+
+  if (currentMillis - previousMillis >= delayTime) {
+    // save the last time you blinked the LED
+    previousMillis = currentMillis;
+
+    // if the LED is off turn it on and vice-versa:
+//    if (ledState == LOW) {
+//      ledState = HIGH;
+//    } else {
+//      ledState = LOW;
+//    }
+
+    ledState = (ledState == LOW)?HIGH:LOW;
+
+    // set the LED with the ledState of the variable:
+    digitalWrite(ledPin, ledState);
+  }
+}
