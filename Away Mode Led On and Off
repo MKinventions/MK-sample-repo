@@ -1,0 +1,38 @@
+
+int led = 3;
+
+int ledState = 0;
+
+//int timer;
+int counter = 0;
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(led, OUTPUT);
+
+}
+
+void loop() {
+
+  AWAY_MODE(led, 20000, 5000);//total time, random time.
+
+}
+
+
+
+void AWAY_MODE(int ledPin, int totalTime, int randomTime) {
+
+  while (1) {
+    int delayTime = random(randomTime, totalTime);
+
+    digitalWrite(led, HIGH);
+    Serial.println("AWAY MODE ON:" + String(delayTime));
+    delay(delayTime);
+
+    digitalWrite(led, LOW);
+    Serial.println("AWAY MODE OFF:" + String(delayTime));
+    delay(delayTime);
+  }
+
+
+}
