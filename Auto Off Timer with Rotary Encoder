@@ -1,0 +1,338 @@
+#include <EEPROM.h>
+#include "EEPROM.h"
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+
+/*********OLED DISPLAY START*********************************************/
+#define SCREEN_WIDTH 128 // OLED display width, in pixels
+#define SCREEN_HEIGHT 64 // OLED display height, in pixels
+#define OLED_RESET     -1 // Reset pin # (or -1 if sharing Arduino reset pin)
+#define SCREEN_ADDRESS 0x3C
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
+/**********OLED DISPLAY END****************************************************/
+
+
+
+
+/*********controllers gpio pins start***********/
+#define joyButton 14
+#define encoderButton 25
+#define encoder_DT 33
+#define encoder_CLK 32
+#define led 2
+///*********controllers gpio pins end***********/
+
+/************button controllers start****************************/
+int buttonState[10];
+int lastButton[10];
+int currentButton[10];
+int debounceDelay = 10;
+unsigned long previousMillis = 0;
+
+int button1State = 0;
+int button2State = 0;
+/************button controllers end*******************************/
+
+/************rotary encoder start*********************************/
+int currentStateCLK[3];
+int lastStateCLK[3];
+int encoder_counter[3];
+int encoder1_counter = 0;
+/************rotary encoder end**********************************/
+
+int lastButton1 = 0;
+int lastButton2 = 0;
+
+
+/********EEPROM memory start***********************/
+int onTime_address = 32;
+int offTime_address = 33;
+byte onTime_value = 0;
+byte offTime_value = 0;
+/***************EEPROM memory end***********/
+
+
+void buttonsAndCotrollers(void *pvParameters);
+
+
+
+int counter = 0;
+void(* resetFunc) (void) = 0; //declare reset function @ address 0
+
+int hourCounter = 0;
+int minCounter = 0;
+int secCounter = 0;
+int totalTime = 0;
+int totalTimeCounter = 0;
+
+void setup() {
+
+  // put your setup code here, to run once:
+  Serial.begin(115200);
+  EEPROM.begin(255);
+
+  //memorySaving();
+
+  pinMode(led, OUTPUT);
+
+  Wire.begin(); // join i2c bus (address optional for master)
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  display.clearDisplay();
+  display.setTextColor(WHITE);
+  display.setTextSize(1);
+  display.setCursor(40, 30);
+  display.println("Restarted");
+  display.display();
+
+  xTaskCreatePinnedToCore(
+    buttonsAndCotrollers
+    ,  "buttonsAndCotrollers"
+    ,  1024  // Stack size
+    ,  NULL
+    ,  2  // Priority
+    ,  NULL
+    ,  1);
+
+  onTime_value = EEPROM.read(onTime_address);//EEPROM.read(ADDRESS 0-255);
+  offTime_value = EEPROM.read(offTime_address);//EEPROM.read(ADDRESS 0-255);
+}
+
+
+
+void loop() {
+
+if (button1State == 0){
+    secCounter = 0;
+    minCounter = 0;
+    hourCounter = 0;
+    totalTimeCounter = 0;
+    digitalWrite(led, LOW);
+  }
+  
+  //Serial.print("Button: "+String(button2State));
+  //Serial.println(", encoder: "+String(encoder1_counter));
+
+
+  if (button2State == 0) {
+    counter++;
+    if (counter == 4) {
+      counter = 0;
+    }
+    Serial.println("counter: " + String(counter));
+  }
+  delay(200);
+
+
+
+
+
+
+  display.clearDisplay();
+  display.fillRoundRect(0, 0, 128, 9, 2, WHITE);
+  display.setTextColor(BLACK);
+  display.setTextSize(1);
+  display.setCursor(3, 1);//COL,ROW
+  display.println("Timer");
+  //  display.setCursor(103,1);display.print(String(pagesCount) + "/" + String(totalPages));
+
+  display.setTextColor(WHITE);
+  display.drawRect(0, 10, 128, 45, WHITE);
+
+  totalTime = onTime_value + offTime_value;
+
+  display.setCursor(3, 13); display.print(" ON  Time  :" + String(onTime_value));
+  display.setCursor(3, 23); display.print(" OFF Time  :" + String(offTime_value));
+  display.setCursor(3, 33); display.print(" Total Time:" + String(totalTime)+" Min");
+  Serial.println("On Time:" + String(onTime_value) + ", Off Time:" + String(offTime_value));
+
+  display.setCursor(0, 56); display.print("Press To Select Time");
+
+
+  if (counter == 1) {
+    Serial.println(">On Time  :" + String(encoder1_counter));
+    display.setCursor(3, 13); display.print(">ON  Time  :" + String(onTime_value)); display.setCursor(80, 13); display.print(" [" + String(encoder1_counter) + "]");
+    EEPROM.write(onTime_address, encoder1_counter);
+
+  }
+  else if (counter == 2) {
+    Serial.println(">Off Time  :" + String(encoder1_counter));
+    display.setCursor(3, 23); display.print(">OFF Time  :" + String(offTime_value)); display.setCursor(80, 23); display.print(" [" + String(encoder1_counter) + "]");
+    EEPROM.write(offTime_address, encoder1_counter);
+  }
+  else if (counter == 3) {
+    resetFunc();  //call reset
+  }
+
+  Serial.println("Total Seconds===" + String(60 * totalTime));
+
+  //****************************************************************//
+  Serial.println(String(button1State));
+  
+  if (button1State == 1) {
+
+    while (secCounter < 60 * totalTime) { //60sec x total mins
+      secCounter++;
+      totalTimeCounter++;
+      Serial.println("Total Time: "+String(60 * totalTime)+", Total Time Counter: "+String(totalTimeCounter));
+//      Serial.println("Load will Turn off in [" + String(secCounter) + "] seconds");
+
+      delay(1000);
+
+      if (secCounter == 60) { //60 seconds
+        secCounter = 0;
+        minCounter++;
+      }
+
+      if (minCounter == 60) { //60 minutes
+        minCounter = 0;
+        hourCounter++;
+      }
+
+
+
+//      Serial.println("Time=> Hours:"+String(hourCounter)+",Minutes:"+String(minCounter)+", Seconds:"+String(secCounter));
+//if(minCounter == 1 && secCounter == 30){
+//  Serial.println("ooooooooooooooooooooooooooooooooooooooooooooooo");
+//}
+
+
+      //    display.setCursor(3,43);display.print("Timer: "+String(secCounter));
+      display.clearDisplay();
+      display.setTextColor(WHITE);
+
+      display.setTextSize(1);
+      display.setCursor(1, 10);
+      display.println("Total Time: " + String(totalTime) + " Min");
+
+      display.setTextSize(1);
+      display.setCursor(1, 30);
+      display.println("Hr:" + String(hourCounter) + ", Min:" + String(minCounter) + ", Sec:"+String(secCounter));
+      display.display();
+      
+
+
+      if (minCounter == onTime_value) {
+        digitalWrite(led, HIGH);
+        Serial.println("Load is Turned on");
+      }
+      if (totalTimeCounter == 60 * totalTime) {
+        digitalWrite(led, LOW);
+        Serial.println("Load is Turned off");
+        resetFunc();  //call reset
+      }
+      
+    }   
+  }
+  
+  //****************************************************************//
+
+
+
+
+  display.display();
+  EEPROM.commit();
+
+}
+
+
+
+
+
+
+
+void buttonsAndCotrollers(void *pvParameters) {
+
+  (void) pvParameters;
+  pinMode(joyButton, INPUT_PULLUP);
+  pinMode(encoderButton, INPUT_PULLUP);
+  //pinMode(switch1, INPUT_PULLUP);
+  //pinMode(switch2, INPUT_PULLUP);
+
+  pinMode(encoder_CLK, INPUT_PULLUP);
+  pinMode(encoder_DT, INPUT_PULLUP);
+
+
+
+
+  for (;;)
+  {
+    button1State = button_controller_status(joyButton, 1, 1);
+    button2State = button_controller_status(encoderButton, 2, 0);
+    encoder1_counter = rotary_encode_controller(encoder_CLK, encoder_DT, 1 , 255, 1);
+    vTaskDelay(1);
+  }
+}
+
+
+/***********PUSH BUTTON AND TOGGLE BUTTON CONTROLLER**********************************************/
+uint16_t button_controller_status(uint8_t buttonGpioPin, uint8_t buttonIndex, uint8_t buttonType) {
+  if (buttonType == 1) {
+    unsigned long currentMillis = millis();
+    if (currentMillis - previousMillis >= debounceDelay) {
+      currentButton[buttonIndex] = digitalRead(buttonGpioPin);
+      if (currentButton[buttonIndex] != lastButton[buttonIndex]) {
+        lastButton[buttonIndex] = currentButton[buttonIndex];
+        previousMillis = currentMillis;
+
+        if (lastButton[buttonIndex] == 0) {
+          buttonState[buttonIndex] = (buttonState[buttonIndex] == 0) ? 1 : 0;
+        }
+      }
+    }
+  } else if (buttonType == 0) {
+    buttonState[buttonIndex] = digitalRead(buttonGpioPin);
+  }
+  return buttonState[buttonIndex];
+}
+
+
+/************ROTARY ENCODER***********************************************************************/
+uint16_t rotary_encode_controller(uint16_t encoderCLK, uint16_t encoderDT, uint8_t index, uint16_t rotaryValue, uint8_t rotaryDirection) {
+  if (rotaryDirection == 0) {
+    // Read the current state of CLK
+    currentStateCLK[index] = digitalRead(encoderCLK);
+    if (currentStateCLK[index] != lastStateCLK[index]  && currentStateCLK[index] == 1) {
+      if (digitalRead(encoderDT) != currentStateCLK[index]) {
+        encoder_counter[index] --;
+      } else {
+        // Encoder is rotating CW so increment
+        encoder_counter[index] ++;
+      }
+    }
+
+    if (encoder_counter[index] < 0) {
+      encoder_counter[index] = 0;
+    }
+    if (encoder_counter[index] > rotaryValue) {
+      encoder_counter[index] = rotaryValue;
+    }
+    // Remember last CLK state
+    lastStateCLK[index] = currentStateCLK[index];
+  }
+
+  else if (rotaryDirection == 1) {
+    // Read the current state of CLK
+    currentStateCLK[index] = digitalRead(encoderCLK);
+    if (currentStateCLK[index] != lastStateCLK[index]  && currentStateCLK[index] == 1) {
+      if (digitalRead(encoderDT) != currentStateCLK[index]) {
+        encoder_counter[index] ++;
+      } else {
+        // Encoder is rotating CW so increment
+        encoder_counter[index] --;
+      }
+    }
+
+    if (encoder_counter[index] < 0) {
+      encoder_counter[index] = 0;
+    }
+    if (encoder_counter[index] > rotaryValue) {
+      encoder_counter[index] = rotaryValue;
+    }
+    // Remember last CLK state
+    lastStateCLK[index] = currentStateCLK[index];
+  }
+
+  return encoder_counter[index];
+}
