@@ -1,0 +1,132 @@
+
+int echoPin = A3;
+int trigPin = A4;
+
+
+int pir = 8;
+int load_led = 5;
+int pirSensor_led = 6;
+int ultrasonicSensor_led = 7;
+int relay = 3;
+int timerPot = A1;
+int distancePot = A0; 
+
+
+//int timer = 3*60; // 1 = 1sec, 60 = 60 sec
+int timer = 0; // 1 = 1sec, 60 = 60 sec
+int setDistance = 0;
+
+int counter = 0;
+int i = 0;
+
+long distance;
+long distanceInch;
+long duration;
+
+void(* resetFunc) (void) = 0; //declare reset function @ address 0
+
+int pirSensor = 0;
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  pinMode(load_led, OUTPUT);
+  pinMode(pirSensor_led, OUTPUT);
+  pinMode(ultrasonicSensor_led, OUTPUT);
+  pinMode(relay, OUTPUT);
+  pinMode(pir, INPUT_PULLUP);
+  
+    pinMode(timerPot, INPUT);
+    pinMode(distancePot, INPUT);
+
+  Serial.println("restarted");
+
+  
+  digitalWrite(load_led, LOW);
+  digitalWrite(pirSensor_led, LOW);
+  digitalWrite(relay, LOW);
+}
+
+void loop() {
+
+timer = map(analogRead(timerPot),0, 1023, 0,300);
+setDistance = map(analogRead(distancePot),1023,0, 0,100);
+
+  pirSensor = digitalRead(pir);
+
+if(pirSensor == 1){
+  digitalWrite(pirSensor_led, HIGH);
+}else{
+  digitalWrite(pirSensor_led, LOW);
+}
+
+
+
+  ULTRASONIC();
+  Serial.println("DISTANCE CM:" + String(distance) + ", PIR:" + String(pirSensor)+ ", Timer:" + String(timer)+ ", Distance:" + String(setDistance));
+
+if(distance <= setDistance){
+  digitalWrite(ultrasonicSensor_led, HIGH);
+}else{
+  digitalWrite(ultrasonicSensor_led, LOW);
+}
+
+
+  if (distance < setDistance && pirSensor == 1) {   //50CM if object detectes enter into the condition
+
+    digitalWrite(load_led, HIGH);
+    digitalWrite(pirSensor_led, pirSensor);
+    digitalWrite(relay, HIGH);
+
+    while (1) {      //if object is left then goto while loop
+      ULTRASONIC();  // recall the function for checking the distance
+      if (distance  >  setDistance+5) {
+        Serial.println("NOT DETECTED:");
+
+        while (counter <= timer) {
+          counter++;
+          Serial.println("PIR:[" + String(pirSensor) + "] & Ultrasonic:[" + String(distance) + "]] Sensors Detected, Timer:" + String(counter));
+          digitalWrite(load_led, HIGH);
+          digitalWrite(relay, HIGH);
+
+          ULTRASONIC(); // recall the function to stop the timer
+          if (distance < setDistance+5) {
+            counter = 0;
+            digitalWrite(load_led, HIGH);
+            digitalWrite(relay, HIGH);
+          }
+
+        delay(1000);
+        }
+
+//        if (counter == timer + 1) {
+        if (counter >= timer) {  
+          digitalWrite(load_led, LOW);
+          digitalWrite(relay, LOW);
+          delay(1000);
+          resetFunc();  //call reset
+        }
+
+      }
+    }
+  }
+
+
+
+
+}
+
+
+void ULTRASONIC() {
+  
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  duration = pulseIn(echoPin, HIGH);
+  distance = duration * 0.034 / 2;
+  distanceInch = duration * 0.0133 / 2;
+
+}
