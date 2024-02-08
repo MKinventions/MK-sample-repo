@@ -1,0 +1,228 @@
+#include <EEPROM.h>
+
+int led1 = 10;
+int led2 = 12;
+int btn = 8;
+int btnState = 0;
+int lastButton = 0;
+int ledState = 0;
+
+unsigned long previousMillisBtn = 0;
+unsigned int btnCounter = 0;
+unsigned long startTimer = 0;
+bool timerExpired = 0;
+int timeDuration = 5000;
+
+int led1_address = 1;
+byte led1_value;
+
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(btn, INPUT);
+  pinMode(led1, OUTPUT);
+  pinMode(led2, OUTPUT);
+
+  led1_value = EEPROM.read(led1_address);
+  Serial.println("Restarted");
+  Serial.println("LED1 Memory: " + String(led1_value));
+
+  if (led1_value == 1) {
+    digitalWrite(led1, HIGH);
+  } else if (led1_value == 1) {
+    digitalWrite(led1, LOW);
+  }
+
+}
+
+
+void loop() {
+
+  unsigned long currentMillisBtn = millis();
+  if (currentMillisBtn - previousMillisBtn >= 10) {
+
+    int button = digitalRead(btn);
+
+    if (button != lastButton) {
+      previousMillisBtn = currentMillisBtn;
+
+      lastButton = button;
+
+      if (lastButton == 0) {
+        //    btnState = (btnState == 0)?1:0;
+        if (btnState == 1) {
+          btnState = 0;
+          digitalWrite(led1, LOW);
+          EEPROM.write(led1_address, 0);
+        } else if (btnState == 0) {
+          btnState = 1;
+          btnCounter++;
+          Serial.println("Button counter: " + String(btnCounter));
+          digitalWrite(led1, HIGH);
+          EEPROM.write(led1_address, 1);
+          startTimer = millis();
+          timerExpired = false;
+        }
+        Serial.println("Button: " + String(btnState));
+        //      delay(200);
+      }
+    }
+  }
+
+
+
+
+
+  if (millis() - startTimer >= timeDuration && !timerExpired) {
+    timerExpired = true;
+    Serial.println("Timer expired, Total button count: " + String(btnCounter));
+
+
+    //****addition mode*******************************
+    if (btnCounter == 2) {
+      int ledBlinksPerSec = 2; // led blinks for seconds
+      int delayTime = 1000 / ledBlinksPerSec; //1sec = 1000 => 1000/how many blinks
+      int provisionTime = 60; //Provision in seconds
+      int i = provisionTime * ledBlinksPerSec; // total provisioning time * how many blinks
+
+      while (i > 0) {
+        i--;
+
+        if (ledState == 0) {
+          Serial.println("Provision for " + String(provisionTime) + "sec, i:" + String(i / ledBlinksPerSec));
+          ledState = 1;
+        } else {
+          ledState = 0;
+        }
+        digitalWrite(led1, ledState);
+        delay(delayTime);
+
+        if(i == i / ledBlinksPerSec){
+          Serial.println("@@@@Provision Time Out@@@@");
+        }
+        
+      }
+    }
+
+
+    //***********************************
+    if (btnCounter == 4) {
+      int ledBlinksPerSec = 4; // led blinks for seconds
+      int delayTime = 1000 / ledBlinksPerSec; //1sec = 1000 => 1000/how many blinks
+      int provisionTime = 20; //How many second should be in provision
+      int i = provisionTime * ledBlinksPerSec; // total provisioning time * how many blinks
+
+      while (i > 0) {
+        i--;
+
+        if (ledState == 0) {
+          Serial.println("Provision for " + String(provisionTime) + "sec, i:" + String(i / ledBlinksPerSec));
+          ledState = 1;
+        } else {
+          ledState = 0;
+        }
+
+        digitalWrite(led1, ledState);
+        delay(delayTime);
+
+        if(i == i / ledBlinksPerSec){
+          Serial.println("@@@@Provision Time Out@@@@");
+        }
+      }
+    }
+
+
+
+    //***********************************
+    if (btnCounter == 6) {
+      int ledBlinksPerSec = 6; // led blinks for seconds
+      int delayTime = 1000 / ledBlinksPerSec; //1sec = 1000 => 1000/how many blinks
+      int provisionTime = 20; //How many second should be in provision
+      int i = provisionTime * ledBlinksPerSec; // total provisioning time * how many blinks
+
+      while (i > 0) {
+        i--;
+
+        if (ledState == 0) {
+          Serial.println("Provision for " + String(provisionTime) + "sec, i:" + String(i / ledBlinksPerSec));
+          ledState = 1;
+        } else {
+          ledState = 0;
+        }
+
+        digitalWrite(led1, ledState);
+        delay(delayTime);
+
+        if(i == i / ledBlinksPerSec){
+          Serial.println("@@@@Provision Time Out@@@@");
+        }
+        
+      }
+    }
+
+
+    //    //*********change AP mode**************************
+    //    if (btnCounter == 4) {
+    //      int i = 60;
+    //      while (i > 0) { //60 = 30sec
+    //        i--;
+    //        Serial.println("Provision for 30sec, i:" + String(i));
+    //        digitalWrite(led2, HIGH);
+    //        delay(250);
+    //        digitalWrite(led2, LOW);
+    //        delay(250);
+    //      }
+    //    }
+
+    //    //***********************************
+    //    if (btnCounter == 6) {
+    //      int i = 150;
+    //      while (i > 0) { //30seconds
+    //        i--;
+    //        Serial.println("i:" + String(i));
+    //        digitalWrite(led1, HIGH);
+    //        digitalWrite(led2, HIGH);
+    //        delay(100);
+    //        digitalWrite(led1, LOW);
+    //        digitalWrite(led2, LOW);
+    //        delay(100);
+    //      }
+    //
+    //    }
+
+    //*******device reset****************************
+    if (btnCounter == 8) {
+      int i = 0;
+      while (i < 150) { //30seconds
+        i++;
+        Serial.println("i:" + String(i));
+        digitalWrite(led1, HIGH);
+        digitalWrite(led2, LOW);
+        delay(100);
+        digitalWrite(led1, LOW);
+        digitalWrite(led2, HIGH);
+        delay(100);
+
+        if (i == 150) {
+          digitalWrite(led1, LOW);
+          digitalWrite(led2, LOW);
+        }
+      }
+
+    }
+
+    btnCounter = 0;
+
+
+
+  }
+
+
+
+
+
+
+}
+
+
+
