@@ -1,0 +1,184 @@
+#include<EEPROM.h>
+
+const int joy1 = 34; // Analog pin connected to the X-axis
+const int joy2 = 36; // Analog pin connected to the Y-axis
+const int joy3 = 39; // Analog pin connected to the X-axis
+const int joy4 = 35; // Analog pin connected to the Y-axis
+
+const int btn1 = 27;
+const int btn2 = 26;
+
+const int joy1Value = 255;
+const int joy2Value = 255;
+const int joy3Value = 255;
+const int joy4Value = 255;
+
+int joy1CalAddress = 0x10;
+byte joy1CalValue;
+
+int joy2CalAddress = 0x11;
+byte joy2CalValue;
+
+int joy3CalAddress = 0x12;
+byte joy3CalValue;
+
+int joy4CalAddress = 0x13;
+byte joy4CalValue;
+
+
+int pot1Dir_value = 0;
+int pot2Dir_value = 0;
+int pot3Dir_value = 0;
+int pot4Dir_value = 0;
+
+void setup() {
+  Serial.begin(115200);
+  EEPROM.begin(512);
+
+  pinMode(joy1, INPUT);
+  pinMode(joy2, INPUT);
+  pinMode(joy3, INPUT);
+  pinMode(joy4, INPUT);
+  pinMode(btn1, INPUT_PULLUP);
+  pinMode(btn2, INPUT_PULLUP);
+    
+  joy1CalValue = EEPROM.read(joy1CalAddress);
+  joy2CalValue = EEPROM.read(joy2CalAddress);
+  joy3CalValue = EEPROM.read(joy3CalAddress);
+  joy4CalValue = EEPROM.read(joy4CalAddress);
+}
+
+void loop() {
+
+int calibrationButton1 = digitalRead(btn1);
+int calibrationButton2 = digitalRead(btn2);
+
+if(calibrationButton1 == 0){
+  //calibration1();
+  calibration2(joy1, joy1Value, pot1Dir_value, joy1CalAddress);
+  calibration2(joy2, joy2Value, pot2Dir_value, joy2CalAddress);
+}
+if(calibrationButton2 == 0){
+  //calibration1();
+  calibration2(joy3, joy3Value, pot3Dir_value, joy3CalAddress);
+  calibration2(joy4, joy4Value, pot4Dir_value, joy4CalAddress);
+}
+
+
+int joystick1 = potentiometer_controller(joy1, joy1Value, pot1Dir_value, joy1CalValue);
+int joystick2 = potentiometer_controller(joy2, joy2Value, pot2Dir_value, joy2CalValue);
+int joystick3 = potentiometer_controller(joy3, joy3Value, pot3Dir_value, joy3CalValue);
+int joystick4 = potentiometer_controller(joy4, joy4Value, pot4Dir_value, joy4CalValue);
+
+Serial.print("Read joy1:" +String(joy1Value - joy1CalValue));
+Serial.print(",joy2:"+String(joy2Value - joy2CalValue));
+Serial.print(",joy3:"+String(joy3Value - joy3CalValue));
+Serial.print(",joy4:"+String(joy4Value - joy4CalValue));
+
+Serial.print(", joystick1 : "); Serial.print(joystick1);
+Serial.print(",joystick2 : "); Serial.print(joystick2);
+Serial.print(",joystick3 : "); Serial.print(joystick3);
+Serial.print(",joystick4 : "); Serial.println(joystick4);
+
+
+
+  delay(100); // Adjust delay as needed
+}
+
+
+int potentiometer_controller(int gpioPin, int potValue, int potDirection, int potCalValue){
+  int potentiometerValue;
+  int readPotentiometer;
+  int potCombineValue;
+  
+  int potReadValue = analogRead(gpioPin);
+
+   if(potDirection == 0){
+  readPotentiometer = map(potReadValue, 4095, 0, potCalValue + potValue, 0);
+   }else if(potDirection == 1){
+  readPotentiometer = map(potReadValue, 4095, 0, 0, potCalValue + potValue);
+   }
+   
+//if(potDirection == 0){
+//  potCombineValue = potCalValue + potValue;
+//}else if(potDirection == 1){
+//  potCombineValue = potCalValue - potValue;
+//}
+//
+//         if(potValue == 180 & potDirection == 0){ readPotentiometer = map(potReadValue, 0, 4095, 0, potCombineValue);}
+//  else if(potValue == 180 & potDirection == 1){ readPotentiometer = map(potReadValue, 0, 4095, potCombineValue, 0);}
+//  else if(potValue == 255 & potDirection == 0){ readPotentiometer = map(potReadValue, 0, 4095, 0, potCombineValue);}
+//  else if(potValue == 255 & potDirection == 1){ readPotentiometer = map(potReadValue, 0, 4095, potCombineValue, 0);}
+
+
+
+  
+
+  if (readPotentiometer >= 132 || readPotentiometer <= 122) {
+    potentiometerValue = readPotentiometer;
+  }
+  else {
+    potentiometerValue = potValue/2;// mid value like 90 for 180, 127 for 255
+  }
+
+    if (potentiometerValue <= 5) {
+    potentiometerValue = 0;
+  }
+
+  if (potentiometerValue > potValue) {
+    potentiometerValue = potValue;
+  }
+  
+//  Serial.print(", Final X-Axis : "); Serial.println(potentiometerValue);
+
+  return potentiometerValue;
+}
+
+
+
+
+
+//void calibration1() {
+//  int xValue = map(analogRead(xAxisPin), 4095, 0, joy1Value, 0);
+//  Serial.print("X-val: "); Serial.print(xValue);
+//
+//  int xCalibrated = xValue - (joy1Value / 2);
+//  Serial.print(", X calibrated: "); Serial.print(xCalibrated);
+//
+//  int xValue1 = xCalibrated * 3;
+//  Serial.print(", X-Axis1 : "); Serial.print(xValue1);
+//
+//  int xValue2 = joy1Value - xValue1;
+//  Serial.print(", X-Axis2 : "); Serial.print(xValue2);
+//  EEPROM.write(joyCalAddress, xValue2);
+//  EEPROM.commit();
+//
+//  Serial.print(", Read xvalue : "); Serial.print(joyCalValue);
+//  int xValue3 = map(analogRead(xAxisPin), 4095, 0, xValue2, 0);
+//
+//  if (xValue3 > joy1Value) {
+//    xValue3 = joy1Value;
+//  }
+//  int minValue = joy1Value - (joy1Value - 5);
+//  if (xValue3 < minValue) {
+//    xValue3 = 0;
+//  }
+//
+//  Serial.print(", Final X-Axis : "); Serial.println(xValue3);
+//
+//}
+
+
+void calibration2(int gpioPin, int potValue, int potDirection, int potCalAddress) {
+  int readPotentiometer = map(analogRead(gpioPin), 4095, 0, potValue, 0);
+  Serial.print("readRawPot: "); Serial.print(readPotentiometer);
+
+  int calibratedPot = readPotentiometer - (potValue / 2);
+  Serial.print(", calibratedPot: "); Serial.print(calibratedPot);
+
+  int potFinalValue = potValue - (calibratedPot * 3);
+  Serial.print(", potFinalValue : "); Serial.print(potFinalValue);
+  EEPROM.write(potCalAddress, potFinalValue);
+  EEPROM.commit();
+  Serial.println("");
+}
