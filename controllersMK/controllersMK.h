@@ -6,9 +6,17 @@
 /***********PUSH BUTTON AND TOGGLE BUTTON CONTROLLER**********************************************/
 uint16_t button_controller(uint8_t buttonGpioPin, uint8_t buttonIndex, uint8_t buttonType); 
 
+/*************POTENTIOMETERS CONTROL TYPE AND DIRECTIOMN*******************************/
+uint16_t potentiometer_controller(uint8_t potValue, uint8_t potDirection, uint8_t potGpioPin);
 
-/*************POTENTIOMETERS & jOYSTICKS CONTROL TYPE AND DIRECTIOMN*******************************/
-uint16_t potentiometer_controller(uint8_t potGpioPin, uint8_t potValue, uint8_t potDirection);
+
+
+/*************JOYSTICKS CONTROL TYPE AND DIRECTIOMN*******************************/
+uint16_t joystick_controller(int joyGpio, int joyValue, int joyDirection, int calibrateValue);
+
+
+/*************JOYSTICKS CALIBRATION*******************************/
+void joystick_calibration(int joyGpio, int joyValue, int joyDirection, int joyCalibrationAddress);
 
 
 /************ROTARY ENCODER***********************************************************************/
