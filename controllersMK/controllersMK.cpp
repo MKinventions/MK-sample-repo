@@ -1,4 +1,4 @@
-
+#include <EEPROM.h>
 #include "controllersMK.h"
 
 
@@ -49,19 +49,81 @@ uint16_t button_controller(uint8_t buttonGpioPin, uint8_t buttonIndex, uint8_t b
 }
 
 
-/**************************************************************************************************/
 /*************POTENTIOMETERS & jOYSTICKS CONTROL TYPE AND DIRECTIOMN*******************************/
-/**************************************************************************************************/
-uint16_t potentiometer_controller(uint8_t potGpioPin, uint8_t potValue, uint8_t potDirection){ 
- uint8_t controller = 0;
-
- uint16_t potReadValue = analogRead(potGpioPin); 
-      if(potValue == 180 & potDirection == 0){ controller = map(potReadValue, 0, 4095, 0, 180);}
- else if(potValue == 180 & potDirection == 1){ controller = map(potReadValue, 0, 4095, 180, 0);}
- else if(potValue == 255 & potDirection == 0){ controller = map(potReadValue, 0, 4095, 0, 255);}
- else if(potValue == 255 & potDirection == 1){ controller = map(potReadValue, 0, 4095, 255, 0);}
-
+uint16_t potentiometer_controller(uint8_t potValue, uint8_t potDirection, uint8_t potGpioPin){ 
+  uint8_t controller = 0;
+  uint16_t potReadValue = analogRead(potGpioPin); 
+       if(potDirection == 0){ controller = map(potReadValue, 0, 4095, 0, potValue);}
+  else if(potDirection == 1){ controller = map(potReadValue, 0, 4095, potValue, 0);}
 return controller;
+}
+
+uint16_t joystick_controller(int joyGpio, int joyValue, int joyDirection, int calibrateValue) {
+  int joystickFinal;
+  int joyLevel;
+
+  //  Serial.print(", ReadCalibratedValue:" + String(calibrateValue));
+
+  if (joyDirection == 0) {
+    joystickFinal = map(analogRead(joyGpio), 4095, 0, joyValue + (calibrateValue * 2), 0);
+  }
+  else if (joyDirection == 1) {
+    joystickFinal = map(analogRead(joyGpio), 4095, 0, 0, joyValue - (calibrateValue * 2));
+  }
+  //  Serial.print(", joystickFinal:" + String(joystickFinal));
+  //  Serial.print(", joystickFinalCopy:" + String(joystickFinalCopy));
+
+  int joystickFinalCopy = joystickFinal;
+  int midPointValue = joyValue / 2;
+
+  if (joystickFinalCopy > midPointValue+2 || joystickFinalCopy < midPointValue-2) {
+    joyLevel = joystickFinal;
+  } else {
+    joyLevel = midPointValue;// 90 if 180 (or) 127 if 255
+  }
+
+  if (joyValue == 255 && joystickFinal >= 240) {
+    joyLevel = 255;
+  }
+  if (joyValue == 180 && joystickFinal >= 170) {
+    joyLevel = 180;
+  }
+  //  else {
+  //    joyLevel = joystickFinal;
+  //  }
+
+  return joyLevel;
+
+}
+
+
+void joystick_calibration(int joyGpio, int joyValue, int joyDirection, int joyCalibrationAddress) {
+  int readRawValue = analogRead(joyGpio);
+  Serial.print("Raw:" + String(readRawValue));
+  int midPointValue = joyValue / 2;
+  Serial.print(", mid:" + String(midPointValue));
+
+
+  int calibrate;
+
+  if (joyDirection == 0) {
+    int mapRawValue = map(readRawValue, 4095, 0, joyValue, 0);
+    Serial.print(", map:" + String(mapRawValue));
+
+    calibrate = midPointValue - mapRawValue;
+    Serial.print(", calibrate:" + String(calibrate));
+  }
+  else if (joyDirection == 1) {
+    int mapRawValue = map(readRawValue, 4095, 0, 0, joyValue);
+    Serial.print(", map:" + String(mapRawValue));
+
+    calibrate = -(midPointValue - mapRawValue);
+    Serial.println(", calibrate:" + String(calibrate));
+  }
+
+  EEPROM.write(joyCalibrationAddress, calibrate);
+  EEPROM.commit();
+
 
 }
 
