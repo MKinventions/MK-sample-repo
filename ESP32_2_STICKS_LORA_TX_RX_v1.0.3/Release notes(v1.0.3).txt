@@ -1,0 +1,5 @@
+Release notes:
+1. Updated the joysticks calibration.
+2. Updated the joysticks offset.
+3. Updated the controllersMK library with joystick offset.
+4. Remaining all the features are same as v1.0.2.
